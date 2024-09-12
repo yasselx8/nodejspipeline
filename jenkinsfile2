@@ -23,11 +23,16 @@ node {
    }
 
    stage('Docker Run') {
+     // Detener y eliminar contenedor antiguo si existe
      sh """
      if [ \$(docker ps -q -f name=nodejsapp-${gitcommit}) ]; then
        docker stop nodejsapp-${gitcommit}
        docker rm nodejsapp-${gitcommit}
      fi
+     """
+     
+     // Ejecutar nuevo contenedor
+     sh """
      docker run --rm -d -p 3000:3000 --name nodejsapp-${gitcommit} yasselreyes8x/nodejsapp:${gitcommit}
      """
    }
