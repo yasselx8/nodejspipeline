@@ -24,6 +24,10 @@ node {
 
    stage('Docker Run') {
      sh """
+     if [ \$(docker ps -a -q -f name=nodejsapp-${gitcommit}) ]; then
+       docker stop nodejsapp-${gitcommit}
+       docker rm nodejsapp-${gitcommit}
+     fi
      docker run -d -p 3000:3000 --name nodejsapp-${gitcommit} yasselreyes8x/nodejsapp:${gitcommit}
      """
    }
