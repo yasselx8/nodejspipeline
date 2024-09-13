@@ -1,12 +1,12 @@
 node {
    def gitcommit
-   stage('Verificacion SCM') {
+   stage('Verificación SCM') {
      checkout scm
      sh "git rev-parse --short HEAD > .git/commit-id"
      gitcommit = readFile('.git/commit-id').trim()
    }
    
-   stage('test') {
+   stage('Test') {
      def contenedortest = docker.image('node:4.6')
      contenedortest.pull()
      contenedortest.inside {
@@ -17,23 +17,35 @@ node {
    
    stage('Docker Build & Push') {
      docker.withRegistry('https://registry.hub.docker.com', 'da78c0c3-dd24-4a43-a114-7bb847308e6d') {
-      def nuestraapp = docker.build("yasselreyes8x/nodejsapp:${gitcommit}", ".")
-      nuestraapp.push()
+       def nuestraapp = docker.build("yasselreyes8x/nodejsapp:${gitcommit}", ".")
+       nuestraapp.push()
      }
    }
 
    stage('Docker Run') {
-     // Detener y eliminar contenedor antiguo si existe
-     sh """
-     if [ \$(docker ps -q -f name=nodejsapp-${gitcommit}) ]; then
-       docker stop nodejsapp-${gitcommit}
-       docker rm nodejsapp-${gitcommit}
-     fi
-     """
-     
-     // Ejecutar nuevo contenedor
-     sh """
-     docker run --rm -d -p 3000:3000 --name nodejsapp-${gitcommit} yasselreyes8x/nodejsapp:${gitcommit}
-     """
+     try {
+       // Crear el nuevo contenedor
+       sh """
+       docker run -d -p 3000:3000 --name nodejsapp-${gitcommit} yasselreyes8x/nodejsapp:${gitcommit}
+       """
+       
+       // Si el nuevo contenedor se despliega correctamente, detener y eliminar el anterior
+       sh """
+       OLD_CONTAINER=\$(docker ps -q -f name=nodejsapp- -f status=running | head -n 1)
+       if [ ! -z "\$OLD_CONTAINER" ]; then
+         docker stop \$OLD_CONTAINER
+         docker rm \$OLD_CONTAINER
+       fi
+       """
+     } catch (Exception e) {
+       // En caso de fallo, eliminar el nuevo contenedor fallido si existe
+       sh """
+       FAILED_CONTAINER=\$(docker ps -aq -f name=nodejsapp-${gitcommit})
+       if [ ! -z "\$FAILED_CONTAINER" ]; then
+         docker rm -f \$FAILED_CONTAINER
+       fi
+       """
+       throw e
+     }
    }
 }
