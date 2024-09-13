@@ -26,10 +26,15 @@ node {
 
    stage('Despliegue Local en Jenkins') {
      sh """
-     if [ \$(docker ps -a -q -f name=nodejsapp-${versionTag}) ]; then
+     # Detener y eliminar el contenedor si ya existe
+     if [ \$(docker ps -q -f name=nodejsapp-${versionTag}) ]; then
        docker stop nodejsapp-${versionTag}
        docker rm nodejsapp-${versionTag}
+     elif [ \$(docker ps -a -q -f name=nodejsapp-${versionTag}) ]; then
+       docker rm nodejsapp-${versionTag}
      fi
+     
+     # Ejecutar nuevo contenedor
      docker pull yasselreyes8x/nodejsapp:${versionTag}
      docker run -d -p 3000:3000 --name nodejsapp-${versionTag} yasselreyes8x/nodejsapp:${versionTag}
      """
@@ -39,10 +44,15 @@ node {
      withCredentials([sshUserPrivateKey(credentialsId: 'credenciales-ssh-id', keyFileVariable: 'SSH_KEY')]) {
        sh """
        sshpass -p 'TIC..2k22' ssh -o StrictHostKeyChecking=no ma@192.168.50.44 '
-         if [ \$(docker ps -a -q -f name=nodejsapp-${versionTag}) ]; then
+         # Detener y eliminar el contenedor si ya existe
+         if [ \$(docker ps -q -f name=nodejsapp-${versionTag}) ]; then
            docker stop nodejsapp-${versionTag}
            docker rm nodejsapp-${versionTag}
+         elif [ \$(docker ps -a -q -f name=nodejsapp-${versionTag}) ]; then
+           docker rm nodejsapp-${versionTag}
          fi
+         
+         # Ejecutar nuevo contenedor
          docker pull yasselreyes8x/nodejsapp:${versionTag}
          docker run -d -p 3000:3000 --name nodejsapp-${versionTag} yasselreyes8x/nodejsapp:${versionTag}
        '
