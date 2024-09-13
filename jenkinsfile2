@@ -23,29 +23,29 @@ node {
    }
 
    stage('Docker Run') {
+     // Intentar detener y eliminar cualquier contenedor anterior
      try {
-       // Crear el nuevo contenedor
        sh """
-       docker run -d -p 3000:3000 --name nodejsapp-${gitcommit} yasselreyes8x/nodejsapp:${gitcommit}
-       """
-       
-       // Si el nuevo contenedor se despliega correctamente, detener y eliminar el anterior
-       sh """
-       OLD_CONTAINER=\$(docker ps -q -f name=nodejsapp- -f status=running | head -n 1)
-       if [ ! -z "\$OLD_CONTAINER" ]; then
-         docker stop \$OLD_CONTAINER
-         docker rm \$OLD_CONTAINER
+       if [ \$(docker ps -q -f name=nodejsapp-) ]; then
+         docker stop \$(docker ps -q -f name=nodejsapp-)
+         docker rm \$(docker ps -a -q -f name=nodejsapp-)
        fi
        """
      } catch (Exception e) {
-       // En caso de fallo, eliminar el nuevo contenedor fallido si existe
+       echo "No se encontró ningún contenedor en ejecución o fallo al eliminar."
+     }
+     
+     // Ejecutar el nuevo contenedor
+     try {
        sh """
-       FAILED_CONTAINER=\$(docker ps -aq -f name=nodejsapp-${gitcommit})
-       if [ ! -z "\$FAILED_CONTAINER" ]; then
-         docker rm -f \$FAILED_CONTAINER
-       fi
+       docker run -d -p 3000:3000 --name nodejsapp-${gitcommit} yasselreyes8x/nodejsapp:${gitcommit}
        """
-       throw e
+     } catch (Exception e) {
+       // En caso de fallo, mostrar error y eliminar el contenedor fallido
+       sh """
+       docker rm -f nodejsapp-${gitcommit}
+       """
+       error "Fallo al iniciar el contenedor. Revertiendo cambios."
      }
    }
 }
