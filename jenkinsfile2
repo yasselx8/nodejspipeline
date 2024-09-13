@@ -44,11 +44,10 @@ node {
      withCredentials([sshUserPrivateKey(credentialsId: 'ssh-remote', keyFileVariable: 'SSH_KEY')]) {
        sh """
        echo "Contenido del directorio temporal:"
-       ls -l /tmp
+       ls -l /var/jenkins_home/workspace/Super/tmp
        echo "Contenido del archivo SSH_KEY:"
-       cat \$SSH_KEY
-       ls -l \$SSH_KEY
-       ssh -i \$SSH_KEY -o StrictHostKeyChecking=no ma@192.168.50.44 'echo "Conexión SSH exitosa"'
+       ls -l \$SSH_KEY || echo "No se pudo acceder al archivo \$SSH_KEY"
+       cat \$SSH_KEY || echo "No se pudo mostrar el contenido de \$SSH_KEY"
        ssh -i \$SSH_KEY -o StrictHostKeyChecking=no ma@192.168.50.44 '
          # Detener y eliminar el contenedor si ya existe
          if [ \$(docker ps -q -f name=nodejsapp-${versionTag}) ]; then
