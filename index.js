@@ -1,44 +1,66 @@
 var express = require('express');
 var app = express();
 
-// Configuración de una ruta para servir archivos estáticos
+// Configuración para servir archivos estáticos como imágenes
 app.use(express.static('public'));
 
 app.get('/', function (req, res) {
   res.send(`
     <!DOCTYPE html>
-    <html lang="en">
+    <html lang="es">
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>DESPLEGANDO JENKINS</title>
+      <title>Despliegue con Jenkins - Gobierno de República Dominicana</title>
       <style>
         body {
-          font-family: Arial, sans-serif;
+          font-family: 'Arial', sans-serif;
+          margin: 0;
+          padding: 0;
           display: flex;
           justify-content: center;
           align-items: center;
           height: 100vh;
-          margin: 0;
-          background: linear-gradient(to right, #ff7e5f, #feb47b);
+          background: linear-gradient(to right, #0066cc, #0099ff);
           color: #fff;
         }
         .container {
           text-align: center;
         }
         h1 {
-          font-size: 3em;
-          margin-bottom: 0.5em;
+          font-size: 3.5em;
+          margin: 0.5em 0;
+          color: #ffffff;
         }
         p {
           font-size: 1.5em;
+          margin: 0.5em 0;
+        }
+        img {
+          max-width: 150px;
+          margin-bottom: 20px;
+        }
+        .button {
+          padding: 15px 25px;
+          background-color: #ffffff;
+          color: #0066cc;
+          border: none;
+          font-size: 1.2em;
+          border-radius: 5px;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+        }
+        .button:hover {
+          background-color: #cccccc;
         }
       </style>
     </head>
     <body>
       <div class="container">
-        <h1>¡Desplegando Jenkins!</h1>
-        <p>Tu aplicación está en funcionamiento.</p>
+        <img src="/logo-gobierno-rd.png" alt="Ministerio de Medio Ambiente y Recursos Naturales">
+        <h1>¡Despliegue exitoso con Jenkins!</h1>
+        <p>La aplicación del Gobierno de República Dominicana está en funcionamiento.</p>
+        <button class="button" onclick="window.location.href='https://ambiente.gob.do'">Visitar el sitio oficial</button>
       </div>
     </body>
     </html>
