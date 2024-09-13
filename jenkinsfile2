@@ -1,13 +1,13 @@
 node {
    def gitcommit
-   def versionTag = 'PROD100' // Define la etiqueta inicial (puedes modificar este valor manualmente o gestionarlo de forma automática)
-   
+   def versionTag = 'PROD101' // Tag para el contenedor
+
    stage('Verificación SCM') {
      checkout scm
      sh "git rev-parse --short HEAD > .git/commit-id"
      gitcommit = readFile('.git/commit-id').trim()
    }
-   
+
    stage('Test') {
      def contenedortest = docker.image('node:4.6')
      contenedortest.pull()
@@ -16,7 +16,7 @@ node {
        sh 'npm test'
      }
    }
-   
+
    stage('Docker Build & Push') {
      docker.withRegistry('https://registry.hub.docker.com', 'da78c0c3-dd24-4a43-a114-7bb847308e6d') {
        def nuestraapp = docker.build("yasselreyes8x/nodejsapp:${versionTag}", ".")
@@ -24,30 +24,29 @@ node {
      }
    }
 
-   stage('Docker Run') {
-     // Intentar detener y eliminar cualquier contenedor anterior
-     try {
+   stage('Despliegue Local en Jenkins') {
+     sh """
+     if [ \$(docker ps -a -q -f name=nodejsapp-${versionTag}) ]; then
+       docker stop nodejsapp-${versionTag}
+       docker rm nodejsapp-${versionTag}
+     fi
+     docker pull yasselreyes8x/nodejsapp:${versionTag}
+     docker run -d -p 3000:3000 --name nodejsapp-${versionTag} yasselreyes8x/nodejsapp:${versionTag}
+     """
+   }
+
+   stage('Despliegue en Servidor Remoto') {
+     withCredentials([sshUserPrivateKey(credentialsId: 'credenciales-ssh-id', keyFileVariable: 'SSH_KEY')]) {
        sh """
-       if [ \$(docker ps -q -f name=nodejsapp-) ]; then
-         docker stop \$(docker ps -q -f name=nodejsapp-)
-         docker rm \$(docker ps -a -q -f name=nodejsapp-)
-       fi
+       sshpass -p 'TIC..2k22' ssh -o StrictHostKeyChecking=no ma@192.168.50.44 '
+         if [ \$(docker ps -a -q -f name=nodejsapp-${versionTag}) ]; then
+           docker stop nodejsapp-${versionTag}
+           docker rm nodejsapp-${versionTag}
+         fi
+         docker pull yasselreyes8x/nodejsapp:${versionTag}
+         docker run -d -p 3000:3000 --name nodejsapp-${versionTag} yasselreyes8x/nodejsapp:${versionTag}
+       '
        """
-     } catch (Exception e) {
-       echo "No se encontró ningún contenedor en ejecución o fallo al eliminar."
-     }
-     
-     // Ejecutar el nuevo contenedor
-     try {
-       sh """
-       docker run -d -p 3000:3000 --name nodejsapp-${versionTag} yasselreyes8x/nodejsapp:${versionTag}
-       """
-     } catch (Exception e) {
-       // En caso de fallo, mostrar error y eliminar el contenedor fallido
-       sh """
-       docker rm -f nodejsapp-${versionTag}
-       """
-       error "Fallo al iniciar el contenedor. Revertiendo cambios."
      }
    }
 }
