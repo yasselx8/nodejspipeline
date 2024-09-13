@@ -37,7 +37,7 @@ app.get('/', function (req, res) {
           margin: 0.5em 0;
         }
         img {
-          max-width: 150px;
+          max-width: 450px;
           margin-bottom: 20px;
         }
         .button {
