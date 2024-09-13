@@ -41,7 +41,7 @@ node {
    }
 
    stage('Despliegue en Servidor Remoto') {
-     withCredentials([sshUserPrivateKey(credentialsId: 'credenciales-ssh-id', keyFileVariable: 'SSH_KEY')]) {
+     withCredentials([sshUserPrivateKey(credentialsId: 'ssh-remote', keyFileVariable: 'SSH_KEY')]) {
        sh """
        sshpass -p 'TIC..2k22' ssh -o StrictHostKeyChecking=no ma@192.168.50.44 '
          # Detener y eliminar el contenedor si ya existe
