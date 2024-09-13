@@ -1,5 +1,7 @@
 node {
    def gitcommit
+   def versionTag = 'PROD100' // Define la etiqueta inicial (puedes modificar este valor manualmente o gestionarlo de forma automática)
+   
    stage('Verificación SCM') {
      checkout scm
      sh "git rev-parse --short HEAD > .git/commit-id"
@@ -17,7 +19,7 @@ node {
    
    stage('Docker Build & Push') {
      docker.withRegistry('https://registry.hub.docker.com', 'da78c0c3-dd24-4a43-a114-7bb847308e6d') {
-       def nuestraapp = docker.build("yasselreyes8x/nodejsapp:${gitcommit}", ".")
+       def nuestraapp = docker.build("yasselreyes8x/nodejsapp:${versionTag}", ".")
        nuestraapp.push()
      }
    }
@@ -38,12 +40,12 @@ node {
      // Ejecutar el nuevo contenedor
      try {
        sh """
-       docker run -d -p 3000:3000 --name nodejsapp-${gitcommit} yasselreyes8x/nodejsapp:${gitcommit}
+       docker run -d -p 3000:3000 --name nodejsapp-${versionTag} yasselreyes8x/nodejsapp:${versionTag}
        """
      } catch (Exception e) {
        // En caso de fallo, mostrar error y eliminar el contenedor fallido
        sh """
-       docker rm -f nodejsapp-${gitcommit}
+       docker rm -f nodejsapp-${versionTag}
        """
        error "Fallo al iniciar el contenedor. Revertiendo cambios."
      }
