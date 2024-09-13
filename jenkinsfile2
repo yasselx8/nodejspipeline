@@ -53,13 +53,13 @@ node {
        CONTAINER_ID=\$(docker ps -q -f publish=3000)
        if [ -n "\$CONTAINER_ID" ]; then
          echo "Deteniendo y eliminando el contenedor en ejecución con ID \$CONTAINER_ID"
-         sudo docker stop \$CONTAINER_ID
-         sudo docker rm \$CONTAINER_ID
+         echo "TIC..2k22" | sudo -S docker stop \$CONTAINER_ID
+         echo "TIC..2k22" | sudo -S docker rm \$CONTAINER_ID
        fi
-       
+
        # Ejecutar nuevo contenedor en el servidor remoto
-       sudo docker pull yasselreyes8x/nodejsapp:${versionTag}
-       sudo docker run -d -p 3000:3000 --name nodejsapp-${versionTag} yasselreyes8x/nodejsapp:${versionTag}
+       echo "TIC..2k22" | sudo -S docker pull yasselreyes8x/nodejsapp:${versionTag}
+       echo "TIC..2k22" | sudo -S docker run -d -p 3000:3000 --name nodejsapp-${versionTag} yasselreyes8x/nodejsapp:${versionTag}
      '
      """
    }
