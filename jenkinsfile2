@@ -57,5 +57,7 @@ node {
           docker run -d -p 3000:3000 --name nodejsapp-${versionTag} yasselreyes8x/nodejsapp:${versionTag}
         '
         """
-    }
+      }
+   }
 }
+
