@@ -1,6 +1,6 @@
 node {
    def gitcommit
-   def versionTag = 'PROD102' // Tag para el contenedor
+   def versionTag = 'PROD103' // Tag para el contenedor, cambia esto según necesites
 
    stage('Verificación SCM') {
      checkout scm
@@ -49,19 +49,17 @@ node {
 
      # Detener y eliminar el contenedor en el servidor remoto si ya existe
      sshpass -p 'TIC..2k22' ssh -o StrictHostKeyChecking=no ma@192.168.50.44 '
-       echo "Cambiando a usuario root"
-       echo "TIC..2k22" | sudo -S su -
-
-       if [ \$(docker ps -q -f name=nodejsapp-${versionTag}) ]; then
-         docker stop nodejsapp-${versionTag}
-         docker rm nodejsapp-${versionTag}
-       elif [ \$(docker ps -a -q -f name=nodejsapp-${versionTag}) ]; then
-         docker rm nodejsapp-${versionTag}
+       # Usar sudo directamente para comandos que requieren privilegios elevados
+       if [ \$(sudo docker ps -q -f name=nodejsapp-${versionTag}) ]; then
+         sudo docker stop nodejsapp-${versionTag}
+         sudo docker rm nodejsapp-${versionTag}
+       elif [ \$(sudo docker ps -a -q -f name=nodejsapp-${versionTag}) ]; then
+         sudo docker rm nodejsapp-${versionTag}
        fi
        
        # Ejecutar nuevo contenedor en el servidor remoto
-       docker pull yasselreyes8x/nodejsapp:${versionTag}
-       docker run -d -p 3000:3000 --name nodejsapp-${versionTag} yasselreyes8x/nodejsapp:${versionTag}
+       sudo docker pull yasselreyes8x/nodejsapp:${versionTag}
+       sudo docker run -d -p 3000:3000 --name nodejsapp-${versionTag} yasselreyes8x/nodejsapp:${versionTag}
      '
      """
    }
