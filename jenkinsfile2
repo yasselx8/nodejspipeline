@@ -40,28 +40,29 @@ node {
      """
    }
 
-   stage('Despliegue en Servidor Remoto') {
-     withCredentials([sshUserPrivateKey(credentialsId: 'ssh-remote', keyFileVariable: 'SSH_KEY')]) {
-       sh """
-       echo "Contenido del directorio temporal:"
-       ls -l /var/jenkins_home/workspace/Super/tmp
-       echo "Contenido del archivo SSH_KEY:"
-       ls -l \$SSH_KEY || echo "No se pudo acceder al archivo \$SSH_KEY"
-       cat \$SSH_KEY || echo "No se pudo mostrar el contenido de \$SSH_KEY"
-       ssh -i \$SSH_KEY -o StrictHostKeyChecking=no ma@192.168.50.44 '
-         # Detener y eliminar el contenedor si ya existe
-         if [ \$(docker ps -q -f name=nodejsapp-${versionTag}) ]; then
-           docker stop nodejsapp-${versionTag}
-           docker rm nodejsapp-${versionTag}
-         elif [ \$(docker ps -a -q -f name=nodejsapp-${versionTag}) ]; then
-           docker rm nodejsapp-${versionTag}
-         fi
-         
-         # Ejecutar nuevo contenedor
-         docker pull yasselreyes8x/nodejsapp:${versionTag}
-         docker run -d -p 3000:3000 --name nodejsapp-${versionTag} yasselreyes8x/nodejsapp:${versionTag}
-       '
-       """
-     }
+   stage('Despliegue en Servidor Remoto (con cambio a root)') {
+     sh """
+     # Instalar sshpass si no está disponible
+     if ! command -v sshpass &> /dev/null; then
+       apt-get update && apt-get install -y sshpass
+     fi
+
+     # Detener y eliminar el contenedor en el servidor remoto si ya existe
+     sshpass -p 'TIC..2k22' ssh -o StrictHostKeyChecking=no ma@192.168.50.44 '
+       echo "Cambiando a usuario root"
+       echo "TIC..2k22" | sudo -S su -
+
+       if [ \$(docker ps -q -f name=nodejsapp-${versionTag}) ]; then
+         docker stop nodejsapp-${versionTag}
+         docker rm nodejsapp-${versionTag}
+       elif [ \$(docker ps -a -q -f name=nodejsapp-${versionTag}) ]; then
+         docker rm nodejsapp-${versionTag}
+       fi
+       
+       # Ejecutar nuevo contenedor en el servidor remoto
+       docker pull yasselreyes8x/nodejsapp:${versionTag}
+       docker run -d -p 3000:3000 --name nodejsapp-${versionTag} yasselreyes8x/nodejsapp:${versionTag}
+     '
+     """
    }
 }
