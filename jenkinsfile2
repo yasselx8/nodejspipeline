@@ -26,12 +26,12 @@ node {
 
    stage('Despliegue Local en Jenkins') {
      sh """
-     # Detener y eliminar el contenedor si ya existe
-     if [ \$(docker ps -q -f name=nodejsapp-${versionTag}) ]; then
-       docker stop nodejsapp-${versionTag}
-       docker rm nodejsapp-${versionTag}
-     elif [ \$(docker ps -a -q -f name=nodejsapp-${versionTag}) ]; then
-       docker rm nodejsapp-${versionTag}
+     # Verificar si hay un contenedor en ejecución que usa el puerto 3000
+     CONTAINER_ID=\$(docker ps -q -f publish=3000)
+     if [ -n "\$CONTAINER_ID" ]; then
+       echo "Deteniendo y eliminando el contenedor en ejecución con ID \$CONTAINER_ID"
+       docker stop \$CONTAINER_ID
+       docker rm \$CONTAINER_ID
      fi
      
      # Ejecutar nuevo contenedor
@@ -49,19 +49,17 @@ node {
 
      # Detener y eliminar el contenedor en el servidor remoto si ya existe
      sshpass -p 'TIC..2k22' ssh -o StrictHostKeyChecking=no ma@192.168.50.44 '
-       # Usar sudo con la opción -S para leer la contraseña desde stdin
-       echo "TIC..2k22" | sudo -S bash -c "
-         if [ \$(docker ps -q -f name=nodejsapp-${versionTag}) ]; then
-           docker stop nodejsapp-${versionTag}
-           docker rm nodejsapp-${versionTag}
-         elif [ \$(docker ps -a -q -f name=nodejsapp-${versionTag}) ]; then
-           docker rm nodejsapp-${versionTag}
-         fi
-         
-         # Ejecutar nuevo contenedor en el servidor remoto
-         docker pull yasselreyes8x/nodejsapp:${versionTag}
-         docker run -d -p 3000:3000 --name nodejsapp-${versionTag} yasselreyes8x/nodejsapp:${versionTag}
-       "
+       # Verificar si hay un contenedor en ejecución que usa el puerto 3000
+       CONTAINER_ID=\$(docker ps -q -f publish=3000)
+       if [ -n "\$CONTAINER_ID" ]; then
+         echo "Deteniendo y eliminando el contenedor en ejecución con ID \$CONTAINER_ID"
+         sudo docker stop \$CONTAINER_ID
+         sudo docker rm \$CONTAINER_ID
+       fi
+       
+       # Ejecutar nuevo contenedor en el servidor remoto
+       sudo docker pull yasselreyes8x/nodejsapp:${versionTag}
+       sudo docker run -d -p 3000:3000 --name nodejsapp-${versionTag} yasselreyes8x/nodejsapp:${versionTag}
      '
      """
    }
