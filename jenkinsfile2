@@ -1,6 +1,6 @@
 node {
    def gitcommit
-   def versionTag = 'PROD104' // Tag para el contenedor, cambia esto según necesites
+   def versionTag = 'PROD105' // Tag para el contenedor, cambia esto según necesites
 
    stage('Verificación SCM') {
      checkout scm
