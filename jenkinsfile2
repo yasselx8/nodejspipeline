@@ -48,18 +48,18 @@ node {
      fi
 
      # Detener y eliminar el contenedor en el servidor remoto si ya existe
-     sshpass -p 'TIC..2k22' ssh -o StrictHostKeyChecking=no ma@192.168.50.44 '
+     sshpass -p 'TIC..2k2277' ssh -o StrictHostKeyChecking=no ma@192.168.50.44 '
        # Verificar si hay un contenedor en ejecución que usa el puerto 3000
        CONTAINER_ID=\$(docker ps -q -f publish=3000)
        if [ -n "\$CONTAINER_ID" ]; then
          echo "Deteniendo y eliminando el contenedor en ejecución con ID \$CONTAINER_ID"
-         echo "TIC..2k22" | sudo -S docker stop \$CONTAINER_ID
-         echo "TIC..2k22" | sudo -S docker rm \$CONTAINER_ID
+         echo "TIC..2k2777" | sudo -S docker stop \$CONTAINER_ID
+         echo "TIC..2k2277" | sudo -S docker rm \$CONTAINER_ID
        fi
 
        # Ejecutar nuevo contenedor en el servidor remoto
-       echo "TIC..2k22" | sudo -S docker pull yasselreyes8x/nodejsapp:${versionTag}
-       echo "TIC..2k22" | sudo -S docker run -d -p 3000:3000 --name nodejsapp-${versionTag} yasselreyes8x/nodejsapp:${versionTag}
+       echo "TIC..2k2277" | sudo -S docker pull yasselreyes8x/nodejsapp:${versionTag}
+       echo "TIC..2k2277" | sudo -S docker run -d -p 3000:3000 --name nodejsapp-${versionTag} yasselreyes8x/nodejsapp:${versionTag}
      '
      """
    }
