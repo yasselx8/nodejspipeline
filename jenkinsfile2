@@ -58,8 +58,8 @@ node {
        fi
 
        # Ejecutar nuevo contenedor en el servidor remoto
-       echo "TIC..2k22" | sudo -S docker pull yasselreyes8x/nodejsapp:${versionTag}
-       echo "TIC..2k22" | sudo -S docker run -d -p 3000:3000 --name nodejsapp-${versionTag} yasselreyes8x/nodejsapp:${versionTag}
+       echo "TIC..2k22*" | sudo -S docker pull yasselreyes8x/nodejsapp:${versionTag}
+       echo "TIC..2k22*" | sudo -S docker run -d -p 3000:3000 --name nodejsapp-${versionTag} yasselreyes8x/nodejsapp:${versionTag}
      '
      """
    }
